@@ -1,2 +1,165 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+"""
+
+Author: Christian Greene
+Date written: 04/27/26
+Assignment:  Sudoku Tkinter Application
+Short Desc:  This program creates a simple Sudoku GUI with a 9x9 grid, buttons,
+input validation, a help window, and Sudoku rule checking.
+
+"""
+import tkinter as tk
+from tkinter import messagebox
+
+# Global variables
+grid_entries = []
+status_var = None
+root = None
+
+def create_main_window():
+    """Create the main window, grid, labels, images, and buttons."""
+    global root, status_var
+    root = tk.Tk()
+    root.title("Sudoku Application")
+
+    tk.Label(root, text="Sudoku Puzzle", font=("Arial", 18, "bold")).grid(row=0, column=0, columnspan=9)
+    tk.Label(root, text="Enter numbers 1–9. Click Check Solution to validate.").grid(row=1, column=0, columnspan=9)
+
+    # Optional image (safe if missing)
+    try:
+        logo = tk.PhotoImage(file="sudoku_logo.png")
+        tk.Label(root, image=logo).grid(row=2, column=0, columnspan=9)
+        root.logo = logo
+    except:
+        pass
+
+    create_grid()
+    create_buttons()
+
+    status_var = tk.StringVar()
+    status_var.set("Ready.")
+    tk.Label(root, textvariable=status_var, fg="blue").grid(row=12, column=0, columnspan=9)
+
+    root.mainloop()
+
+def create_grid():
+    """Create the 9x9 Sudoku grid."""
+    global grid_entries
+    for r in range(9):
+        row_list = []
+        for c in range(9):
+            e = tk.Entry(root, width=2, font=("Arial", 14), justify="center")
+            e.grid(row=r+3, column=c, padx=2, pady=2)
+            row_list.append(e)
+        grid_entries.append(row_list)
+
+def create_buttons():
+    """Create buttons and attach callback functions."""
+    tk.Button(root, text="Check Solution", command=check_sudoku).grid(row=13, column=0, columnspan=3)
+    tk.Button(root, text="Clear Board", command=clear_board).grid(row=13, column=3, columnspan=3)
+    tk.Button(root, text="Help", command=open_help_window).grid(row=13, column=6)
+    tk.Button(root, text="Exit", command=exit_app).grid(row=13, column=7, columnspan=2)
+
+def open_help_window():
+    """Open a second window with instructions."""
+    help_win = tk.Toplevel(root)
+    help_win.title("Help")
+
+    tk.Label(help_win, text="How to Use This App", font=("Arial", 14, "bold")).pack(pady=5)
+
+    try:
+        img = tk.PhotoImage(file="help_icon.png")
+        tk.Label(help_win, image=img).pack()
+        help_win.img = img
+    except:
+        pass
+
+    help_text = (
+        "1. Enter numbers 1–9 into the grid.\n"
+        "2. Leave blanks if unsure.\n"
+        "3. Click Check Solution to validate.\n"
+        "4. Click Clear Board to reset.\n"
+        "5. Click Exit to close the program."
+    )
+    tk.Label(help_win, text=help_text, justify="left").pack(pady=10)
+
+def get_grid_values():
+    """Return the grid as a 2D list of integers. Validate input."""
+    grid = []
+    for r in range(9):
+        row = []
+        for c in range(9):
+            text = grid_entries[r][c].get().strip()
+            if text == "":
+                row.append(0)
+            elif text.isdigit() and 1 <= int(text) <= 9:
+                row.append(int(text))
+            else:
+                messagebox.showerror("Input Error", f"Invalid entry at row {r+1}, column {c+1}.")
+                return None
+        grid.append(row)
+    return grid
+
+def is_unit_valid(unit):
+    """Check a row, column, or box for duplicates."""
+    seen = set()
+    for num in unit:
+        if num != 0:
+            if num in seen:
+                return False
+            seen.add(num)
+    return True
+
+def check_sudoku():
+    """Check rows, columns, and 3x3 boxes for duplicates."""
+    global status_var
+    grid = get_grid_values()
+    if grid is None:
+        status_var.set("Fix input errors.")
+        return
+
+    # Rows
+    for r in range(9):
+        if not is_unit_valid(grid[r]):
+            messagebox.showinfo("Result", f"Duplicate in row {r+1}.")
+            status_var.set("Invalid solution.")
+            return
+
+    # Columns
+    for c in range(9):
+        col = [grid[r][c] for r in range(9)]
+        if not is_unit_valid(col):
+            messagebox.showinfo("Result", f"Duplicate in column {c+1}.")
+            status_var.set("Invalid solution.")
+            return
+
+    # Boxes
+    for br in range(3):
+        for bc in range(3):
+            box = []
+            for r in range(br*3, br*3+3):
+                for c in range(bc*3, bc*3+3):
+                    box.append(grid[r][c])
+            if not is_unit_valid(box):
+                messagebox.showinfo("Result", "Duplicate in a 3x3 box.")
+                status_var.set("Invalid solution.")
+                return
+
+    messagebox.showinfo("Result", "Valid Sudoku solution.")
+    status_var.set("Valid solution.")
+
+def clear_board():
+    """Clear all grid entries."""
+    global status_var
+    for r in range(9):
+        for c in range(9):
+            grid_entries[r][c].delete(0, tk.END)
+    status_var.set("Board cleared.")
+
+def exit_app():
+    """Exit the program."""
+    if messagebox.askyesno("Exit", "Exit the application?"):
+        root.destroy()
+
+if __name__ == "__main__":
+    create_main_window()
+
