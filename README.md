@@ -20,4 +20,4 @@ This project is a Python Tkinter GUI application that allows the user to interac
 2. Install Tkinter (usually included with Python on most systems).
 3. Clone this repository:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
+   git clone https://github.com/cgreene54/Sodoku
