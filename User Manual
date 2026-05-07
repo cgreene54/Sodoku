@@ -1,1 +1,73 @@
+Sudoku Tkinter Application – User’s Manual
+
+1. Introduction
+The Sudoku Tkinter Application is a simple, interactive program that allows users to play and solve Sudoku puzzles on their computer. The interface includes a 9×9 grid, buttons for checking and solving puzzles, and a help window with instructions. This manual explains how to use every feature of the application.
+
+2. Starting the Application
+When the program is launched, the main window opens and displays:
+- A title (“Sudoku Puzzle”)
+- A short instruction line
+- A Sudoku logo
+- A 9×9 input grid
+- Buttons for interacting with the puzzle
+- A status bar at the bottom
+The application is ready for use as soon as the main window appears.
+
+3. Entering Numbers
+The center of the window contains a 9×9 grid of text boxes. Each box represents one cell of a Sudoku puzzle.
+- Click any cell to type a number.
+- Valid entries are **1 through 9**.
+- Leaving a cell blank is allowed.
+- Invalid entries (letters, symbols, or numbers outside 1–9) will trigger an error message.
+
+4. Buttons and Their Functions
+1.) Check Solution
+This button checks whether the current grid follows Sudoku rules.
+It verifies:
+- No duplicate numbers in any row  
+- No duplicate numbers in any column  
+- No duplicate numbers in any 3×3 box  
+If a problem is found, a message will tell you exactly where the issue is.  
+If everything is valid, the program confirms that the solution is valid.
+2.) Clear Board
+This button removes all numbers from the grid and resets the board to a blank state.
+3.) Help
+Opens a separate help window that explains how to use the application.  
+The help window also displays a help icon and a list of instructions.
+4.) Solve Puzzle
+This button automatically solves the Sudoku puzzle using a backtracking algorithm.
+- If the puzzle is solvable, the grid fills with the correct solution.
+- If the puzzle has no valid solution, an error message appears.
+5.) Exit
+Closes the application after confirming that you want to exit.
+
+5. Status Bar
+At the bottom of the window is a status message area.  
+It displays updates such as:
+- “Ready.”
+- “Valid solution.”
+- “Invalid solution.”
+- “Board cleared.”
+- “Fix input errors.”
+This helps you understand what the program is doing.
+
+6. Help Window
+When you click **Help**, a new window appears with:
+- A help title
+- A help icon
+- A list of instructions for using the app
+This window is for quick reference and can be closed at any time.
+
+7. Error Messages
+The program will notify you if:
+- You enter an invalid character
+- A row, column, or box contains duplicates
+- The puzzle cannot be solved
+These messages help you correct mistakes and continue playing.
+
+8. Closing the Program
+To close the application:
+1. Click **Exit**
+2. Confirm “Yes” when asked
+The program will shut down safely.
 
