@@ -1,11 +1,10 @@
 """
-
 Author: Christian Greene
 Date written: 04/27/26
 Assignment: Sudoku Tkinter Application
-Description:This program creates a Sudoku GUI using Tkinter. Users can input values into a 9x9 grid,
+Description:
+This program creates a Sudoku GUI using Tkinter. Users can input values into a 9x9 grid,
 validate their solution, clear the board, and view instructions in a separate help window.
-
 """
 
 import tkinter as tk
@@ -28,9 +27,13 @@ def create_main_window():
     # Instruction label
     tk.Label(root, text="Enter numbers 1–9. Click Check Solution to validate.").grid(row=1, column=0, columnspan=9)
 
-    # Load image (with alternate text if missing)
+    # Load Sudoku logo
     try:
-        logo = tk.PhotoImage(file="sudoku_logo.png")
+        from PIL import Image, ImageTk
+        logo_path = r"C:\Users\chris\Downloads\Sodoku.webp"
+        img = Image.open(logo_path)
+        img = img.resize((150, 150))
+        logo = ImageTk.PhotoImage(img)
         tk.Label(root, image=logo).grid(row=2, column=0, columnspan=9)
         root.logo = logo  # prevent garbage collection
     except:
@@ -49,9 +52,9 @@ def create_main_window():
 def create_grid():
     """Create a 9x9 grid of Entry widgets for Sudoku input."""
     global grid_entries
-    for r in range(9):  # loop through rows
+    for r in range(9):
         row_list = []
-        for c in range(9):  # loop through columns
+        for c in range(9):
             e = tk.Entry(root, width=2, font=("Arial", 14), justify="center", relief="solid", bd=1)
             e.grid(row=r+3, column=c, padx=2, pady=2)
             row_list.append(e)
@@ -64,6 +67,9 @@ def create_buttons():
     tk.Button(root, text="Help", command=open_help_window).grid(row=13, column=6)
     tk.Button(root, text="Exit", command=exit_app).grid(row=13, column=7, columnspan=2)
 
+    # Button for Solving
+    tk.Button(root, text="Solve Puzzle", command=solve_puzzle).grid(row=14, column=0, columnspan=4)
+
 def open_help_window():
     """Open a secondary window that displays instructions."""
     help_win = tk.Toplevel(root)
@@ -71,11 +77,15 @@ def open_help_window():
 
     tk.Label(help_win, text="How to Use This App", font=("Arial", 14, "bold")).pack(pady=5)
 
-    # Help image with alternate text fallback
+    # Load help icon
     try:
-        img = tk.PhotoImage(file="help_icon.png")
-        tk.Label(help_win, image=img).pack()
-        help_win.img = img
+        from PIL import Image, ImageTk
+        help_path = r"C:\Users\chris\Downloads\help.avif"
+        img = Image.open(help_path)
+        img = img.resize((120, 120))
+        help_icon = ImageTk.PhotoImage(img)
+        tk.Label(help_win, image=help_icon).pack()
+        help_win.help_icon = help_icon
     except:
         tk.Label(help_win, text="[Help Icon Image]").pack()
 
@@ -96,14 +106,10 @@ def get_grid_values():
         for c in range(9):
             text = grid_entries[r][c].get().strip()
 
-            # Check for empty input
             if text == "":
                 row.append(0)
-
-            # Validate numeric input (1–9)
             elif text.isdigit() and 1 <= int(text) <= 9:
                 row.append(int(text))
-
             else:
                 messagebox.showerror("Input Error", f"Invalid entry at row {r+1}, column {c+1}. Use numbers 1–9.")
                 return None
@@ -120,8 +126,86 @@ def is_unit_valid(unit):
             seen.add(num)
     return True
 
+def find_empty(grid):
+    """Find an empty cell in the Sudoku grid."""
+    for r in range(9):
+        for c in range(9):
+            if grid[r][c] == 0:
+                return r, c
+    return None
+
+def is_valid_move(grid, num, pos):
+    """Check whether placing a number is valid."""
+    row, col = pos
+
+    # Check row
+    for c in range(9):
+        if grid[row][c] == num and c != col:
+            return False
+
+    # Check column
+    for r in range(9):
+        if grid[r][col] == num and r != row:
+            return False
+
+    # Check 3x3 box
+    box_x = col // 3
+    box_y = row // 3
+
+    for r in range(box_y * 3, box_y * 3 + 3):
+        for c in range(box_x * 3, box_x * 3 + 3):
+            if grid[r][c] == num and (r, c) != pos:
+                return False
+
+    return True
+
+def solve_sudoku(grid):
+    """Solve Sudoku using backtracking."""
+    empty = find_empty(grid)
+
+    if not empty:
+        return True
+
+    row, col = empty
+
+    for num in range(1, 10):
+        if is_valid_move(grid, num, (row, col)):
+            grid[row][col] = num
+
+            if solve_sudoku(grid):
+                return True
+
+            grid[row][col] = 0
+
+    return False
+
+def solve_puzzle():
+    """Solve the Sudoku puzzle and display the solution."""
+    global status_var
+
+    grid = get_grid_values()
+
+    if grid is None:
+        status_var.set("Fix input errors before solving.")
+        return
+
+    if solve_sudoku(grid):
+
+        for r in range(9):
+            for c in range(9):
+                grid_entries[r][c].delete(0, tk.END)
+                if grid[r][c] != 0:
+                    grid_entries[r][c].insert(0, str(grid[r][c]))
+
+        messagebox.showinfo("Solved", "Sudoku puzzle solved successfully!")
+        status_var.set("Puzzle solved.")
+
+    else:
+        messagebox.showerror("Error", "No valid Sudoku solution exists.")
+        status_var.set("Unable to solve puzzle.")
+
 def check_sudoku():
-    """Validate the Sudoku board (rows, columns, and 3x3 boxes)."""
+    """Validate the Sudoku board."""
     global status_var
     grid = get_grid_values()
 
